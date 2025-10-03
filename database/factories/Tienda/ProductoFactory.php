@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories\Tineda;
+namespace Database\Factories\Tienda;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,7 +17,10 @@ class ProductoFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'nombre' => $this->faker->word(),
+            'descripcion' => $this->faker->sentence(),
+            'precio' => $this->faker->numberBetween(100, 1000),
+            'activo' => true,
         ];
     }
 }
