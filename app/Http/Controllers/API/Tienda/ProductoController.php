@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\API\Tienda;
 
 use App\Http\Controllers\Controller;
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\Tienda\Producto;
 
@@ -31,13 +33,37 @@ class ProductoController extends Controller
     }
 
     public function create(Request $request) {
-        $producto = new Producto();
-        $producto->nombre = $request->input('nombre');
-        $producto->descripcion = $request->input('descripcion');
-        $producto->precio = $request->input('precio');
-        $producto->save();
+        try {
+            $validator = Validator::make($request->all(), [
+                'nombre' => 'required|min:3|max:255',
+                'descripcion' => 'nullable|min:3|max:255',
+                'precio' => 'required|decimal:2',
+            ]);
 
-        return response()->json($producto);
+            if ($validator->fails()) {
+                return response()->json([
+                    'error' => $validator->errors()
+                ], 400);
+            }
+            
+            $validated = $validator->validated();
+
+            // Solo avanzamos si la validación es correcta
+            $producto = new Producto();
+            $producto->nombre = $validated['nombre'];
+            $producto->descripcion = $validated['descripcion'] ?? null;
+            $producto->precio = $validated['precio'];
+            $producto->save();
+
+            return response()->json($producto);
+        } catch (\Throwable $th) {
+            logger()->error($th->getMessage());
+
+            return response()->json([
+                'error' => $th->getMessage()
+            ], 400);
+        }
+        
     }
 
 }
